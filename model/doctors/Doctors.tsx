@@ -2,11 +2,12 @@ import { model, models, Schema, Document } from "mongoose";
 interface IDoctors {
   name: string;
   family: string;
-  username:string;
-  password:string;
+  username: string;
+  password: string;
   email: string;
-  phone: number;
-  medId: number; // شماره نظام پزشکی
+  phonenumber: string;
+  nationalID: string;
+  medId: string; // شماره نظام پزشکی
   address: string;
   role: string;
   specialty: string;
@@ -17,11 +18,12 @@ const DoctorsSchema = new Schema<IDoctorsDoc>(
   {
     name: { type: String, required: true },
     family: { type: String, required: true },
-    username:{type:String , required:true},
-    password:{type:String , required:true},
+    username: { type: String, required: true },
+    password: { type: String, required: true },
     email: { type: String },
-    phone: { type: Number, required: true },
-    medId: { type: Number, required: true },
+    nationalID: { type: String, required: true },
+    phonenumber: { type: String, required: true },
+    medId: { type: String, required: true },
     address: { type: String, required: true },
     specialty: { type: String, required: true },
     role: { type: String, required: true },

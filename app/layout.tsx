@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Layouts from "@/components/Layouts/Layouts";
+import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,6 +31,17 @@ export default function RootLayout({
       >
         <Layouts>
         {children}
+         <Toaster 
+          position="top-right"
+          reverseOrder={false}
+          toastOptions={{
+            duration: 4000,
+            style: {
+              fontSize: "14px",
+              borderRadius: "8px",
+            },
+          }}
+        />
         </Layouts>
       </body>
     </html>

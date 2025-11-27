@@ -2,8 +2,11 @@ import { NextResponse } from "next/server";
 import { connectDB } from "../../../../lib/Conect";
 import Doctor from "../../../../model/doctors/Doctors";
 import bcrypt from "bcryptjs";
+import { isValidIranianNationalID } from "@/utils/isValidIranianNationalID";
 
 export async function POST(req: Request): Promise<NextResponse> {
+  console.log("REGISTER API CALLED");
+
   try {
     await connectDB();
     const {
@@ -14,8 +17,9 @@ export async function POST(req: Request): Promise<NextResponse> {
       username,
       password,
       specialty,
-      addrress,
-      NationalID,
+      address,
+      medId,
+      nationalID,
     } = await req.json();
     const phonePattern = /^(\+98|0)?9\d{9}$/;
     const emailPttern =
@@ -23,12 +27,13 @@ export async function POST(req: Request): Promise<NextResponse> {
     if (
       !name.trim() ||
       !family.trim() ||
-      !NationalID.trim() ||
+      !nationalID.trim() ||
       !phonenumber.trim() ||
       !password.trim() ||
       !username.trim() ||
-      !addrress.trim() ||
-      !specialty.trim()
+      !address.trim() ||
+      !specialty.trim() ||
+      !medId.trim()
     )
       return NextResponse.json(
         { error: "فیلدها رو خالی نزار " },
@@ -46,7 +51,7 @@ export async function POST(req: Request): Promise<NextResponse> {
       );
     const isUserExits = await Doctor.findOne({
       phonenumber,
-      NationalID,
+      nationalID,
       username,
     });
     if (isUserExits)
@@ -61,6 +66,7 @@ export async function POST(req: Request): Promise<NextResponse> {
         },
         { status: 401 }
       );
+      if(!isValidIranianNationalID(nationalID)) return NextResponse.json({error:"کد ملی معتبر نیست"})
     const hashedPassword = await bcrypt.hash(password, 10);
     await Doctor.create({
       name,
@@ -69,13 +75,18 @@ export async function POST(req: Request): Promise<NextResponse> {
       phonenumber,
       email,
       password: hashedPassword,
-      NationalID,
+      nationalID,
       role: "doctor",
       specialty,
-      addrress,
+      address,
+      medId,
     });
     return NextResponse.json("ثبت نام شما با موفقیت انجام شد");
-  } catch {
-    return NextResponse.json({ error: "ثبت نام خود را مجدد بعد از چند دقیقه دیگر انجام دهید" });
+  } catch (err) {
+    console.error("Register Error:", err);
+    return NextResponse.json(
+      { error: "ثبت نام خود را مجدد بعد از چند دقیقه دیگر انجام دهید" },
+      { status: 500 }
+    );
   }
 }
