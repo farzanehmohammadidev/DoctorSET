@@ -110,7 +110,7 @@ function Page() {
             name="password"
             id="password"
             type={showPassword ? "text" : "password"}
-            className="focus:outline-none w-[100%] text-red-600"
+            className="focus:outline-none w-[99.99%] text-red-600"
             placeholder="یک پسورد انتخاب کنید"
           />
           <span className="text-red-600" onClick={() => setShowPassword(!showPassword)}>
@@ -125,7 +125,7 @@ function Page() {
             name="confirmPassword"
             id="confirmPassword"
             type={showPassword ? "text" : "password"}
-            className="focus:outline-none w-[100%] text-red-600 "
+            className="focus:outline-none w-[99.99%] text-red-600 "
             placeholder="پسورد را مجدد وارد کنید"
           />
           <span className="text-red-600" onClick={() => setShowPassword(!showPassword)}>
