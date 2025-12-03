@@ -1,37 +1,48 @@
 "use client";
 // doctor login
 import Link from "next/link";
-import { NextResponse } from "next/server";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
+import toast from "react-hot-toast";
 import { LuEye, LuEyeClosed } from "react-icons/lu";
 
 function DoctorsLogin() {
   const [showPasssword, setShowPassword] = useState<boolean>(false);
+  const route = useRouter();
   const showPassHandler = () => {
     setShowPassword(!showPasssword);
   };
-  const DoctorsLoginSubmitHandler = async (e:React.FormEvent<HTMLFormElement> ) => {
+  const DoctorsLoginSubmitHandler = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
+    e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const username = formData.get("username");
     const password = formData.get("password");
-    if (!username || !password)
-      return NextResponse.json(
-        { error: "فیلد ها رو خالی نزار!" },
-        { status: 400 }
-      );
+    if (!username || !password) toast.error("فیلد ها رو خالی نزار!");
     try {
-      fetch(`api/auth/DoctorsLogin`, {
+      const res = await fetch(`/api/auth/DoctorsLogin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
         credentials: "include",
       });
+      const data = await res.json();
+      if (data.error) {
+        toast.error(data.error);
+      } else {
+        toast.success(" ورود شما با موفقیت انجام شد!");
+        route.push("/");
+      }
     } catch {
-      return NextResponse.json({ error: "مشکلی در ورود شما به سایت پیش آمد" });
+      return { error: "مشکلی در ورود شما به سایت پیش آمد" };
     }
   };
   return (
-    <form onSubmit={DoctorsLoginSubmitHandler} className="flex justify-center items-center h-screen flex-col bg-blue-50">
+    <form
+      onSubmit={DoctorsLoginSubmitHandler}
+      className="flex justify-center items-center h-screen flex-col bg-blue-50"
+    >
       <div className="w-[700px] rounded flex justify-center p-20 flex-col bg-white">
         <input
           type="text"
@@ -46,6 +57,7 @@ function DoctorsLogin() {
             type={showPasssword ? "text" : "password"}
             name="password"
             id=""
+            placeholder="لطفا پسوورد خود را وارد کنید"
           />
           <span onClick={showPassHandler}>
             {showPasssword ? <LuEyeClosed /> : <LuEye />}
@@ -59,8 +71,7 @@ function DoctorsLogin() {
         </button>
         <p>
           <Link className="text-red-600" href={`RegisterDoctors`}>
-            {" "}
-            حساب کاربری نداری؟{" "}
+            حساب کاربری ندارید؟
           </Link>
         </p>
       </div>

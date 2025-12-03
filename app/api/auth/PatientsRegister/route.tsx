@@ -1,12 +1,11 @@
-//  doctor register 
+// patient Register
 import { NextResponse } from "next/server";
 import { connectDB } from "../../../../lib/Conect";
-import Doctor from "../../../../model/doctors/Doctors";
+import Patient from "@/model/patient/Patient";
 import bcrypt from "bcryptjs";
 import { isValidIranianNationalID } from "@/utils/isValidIranianNationalID";
 
 export async function POST(req: Request): Promise<NextResponse> {
-  console.log("REGISTER API CALLED");
 
   try {
     await connectDB();
@@ -17,9 +16,6 @@ export async function POST(req: Request): Promise<NextResponse> {
       email,
       username,
       password,
-      specialty,
-      address,
-      medId,
       nationalID,
     } = await req.json();
     const phonePattern = /^(\+98|0)?9\d{9}$/;
@@ -31,10 +27,7 @@ export async function POST(req: Request): Promise<NextResponse> {
       !nationalID.trim() ||
       !phonenumber.trim() ||
       !password.trim() ||
-      !username.trim() ||
-      !address.trim() ||
-      !specialty.trim() ||
-      !medId.trim()
+      !username.trim() 
     )
       return NextResponse.json(
         { error: "فیلدها رو خالی نزار " },
@@ -50,7 +43,7 @@ export async function POST(req: Request): Promise<NextResponse> {
         { error: "یه ایمیل معتبر وارد کن" },
         { status: 400 }
       );
-    const isUserExits = await Doctor.findOne({
+    const isUserExits = await Patient.findOne({
       phonenumber,
       nationalID,
       username,
@@ -69,7 +62,7 @@ export async function POST(req: Request): Promise<NextResponse> {
       );
       if(!isValidIranianNationalID(nationalID)) return NextResponse.json({error:"کد ملی معتبر نیست"})
     const hashedPassword = await bcrypt.hash(password, 10);
-    await Doctor.create({
+    await Patient.create({
       name,
       family,
       username,
@@ -77,10 +70,7 @@ export async function POST(req: Request): Promise<NextResponse> {
       email,
       password: hashedPassword,
       nationalID,
-      role: "doctor",
-      specialty,
-      address,
-      medId,
+      role: "patient",
     });
     return NextResponse.json("ثبت نام شما با موفقیت انجام شد");
   } catch (err) {

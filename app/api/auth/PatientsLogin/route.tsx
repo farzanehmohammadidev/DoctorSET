@@ -1,5 +1,5 @@
 import { connectDB } from "@/lib/Conect";
-import Doctor from "@/model/doctors/Doctors";
+import Patient from "@/model/patient/Patient";
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { revalidatePath } from "next/cache";
@@ -30,7 +30,7 @@ export async function POST(req: Request): Promise<NextResponse> {
         { status: 400 }
       );
     const normalizedUsername = username.trim();
-    const findUser = await Doctor.findOne({ username: normalizedUsername });
+    const findUser = await Patient.findOne({ username: normalizedUsername });
     if (!findUser)
       return NextResponse.json(
         { error: "این کاربر وجود ندارد" },
@@ -44,29 +44,30 @@ export async function POST(req: Request): Promise<NextResponse> {
     if (!isValidPassword)
       return NextResponse.json({ error: "رمز شما اشتباهه!" }, { status: 500 });
     const token: string = jwt.sign(
-          { username: findUser.username, role: findUser.role },
-          process.env.JWT_SECRET!,
-          { expiresIn: "2h" }
-        );
+      { username: findUser.username, role: findUser.role },
+      process.env.JWT_SECRET!,
+      { expiresIn: "2h" }
+    );
     if (oldToken) {
       const decoded = jwt.verify(oldToken, process.env.JWT_SECRET!) as {
         role: string;
       };
-      if (decoded.role !== "doctor") {
+      if (decoded.role !== "patient") {
         const response = NextResponse.json({
           success: true,
           message: "تبریک! شما وارد سایت شدید",
         });
-        response.cookies.delete({ name: "token", path: "/" });
+        response.cookies.delete({ name: `token`, path: "/" });
         response.cookies.set({
           name: "token",
           value: token,
           httpOnly: true,
-          sameSite: "strict",
+          sameSite: "lax",
           path: "/",
           maxAge: 60 * 60 * 2,
         });
-        return response
+        revalidatePath("/");
+        return response;
       }
     }
     const response = NextResponse.json({
@@ -77,14 +78,13 @@ export async function POST(req: Request): Promise<NextResponse> {
       name: "token",
       value: token,
       httpOnly: true,
-      sameSite: "strict",
+      sameSite: "lax",
       path: "/",
       maxAge: 60 * 60 * 2,
     });
-    revalidatePath("/")
-    return response
-  } 
-  catch (err) {
+    revalidatePath("/");
+    return response;
+  } catch (err) {
     return NextResponse.json(err);
   }
 }
